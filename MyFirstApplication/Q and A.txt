@@ -1,0 +1,12 @@
+Java at its basic form is a high level programming language meant to provide programmers a powerful feature set while not requiring to have to always deal with low level concepts like memory management.
+
+Java complies at its basic level code that is designed to run on JVM regardless of operating system.
+
+JVM is a program written for each operating system that interprets Java byte code and executes it in its current environment.
+
+Git version control is a way for programmers to:
+1. Back up code.
+2. Author in a series of edits and changes.
+3. Allow devs to reset and roll back code
+4. Allow devs to work together and to easily edit sections of code without conflict.
+
