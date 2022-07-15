@@ -2,13 +2,16 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
+
 public class Blackjack {
+
+    Scanner input = new Scanner(System.in);
     enum Card {
         Ace(1), Two(2), Three(3), Four(4), Five(5),
         Six(6), Seven(7), Eight(8), Nine(9), Ten(10),
         Jack(10), Queen(10), King(10);
 
-        private int value;
+        public int value;
 
         Card(int value){
             this.value = value;
@@ -37,32 +40,33 @@ public class Blackjack {
         }
     }
 
-
-    private ArrayList<Card> userHand = new ArrayList<>();
-    private ArrayList<Card> dealerHand = new ArrayList<>();
+    private Player userHand;
+    private Player dealerHand;
 
 
     public void PlayGame() throws InterruptedException {
         System.out.println("Welcome to BlackJack.");
 
+        userHand = new Player("user");
+        dealerHand = new Player("dealer");
+        userHand.wallet = 100;
+        var bet = getBet();
+        userHand.wallet = userHand.wallet - bet;
 
         var randomCard = DrawRandomCard();
-        userHand.add(randomCard);
-        userHand.add(randomCard);
+        userHand.addCard(randomCard);
+        userHand.addCard(randomCard);
 
         // Show the user their hand.
-        DisplayHand(userHand, "user");
+        userHand.DisplayHand();
 
         // Get a random card and give it to the dealer.
-        dealerHand.add(DrawRandomCard());
-        dealerHand.add(DrawRandomCard());
+        dealerHand.addCard(DrawRandomCard());
+        dealerHand.addCard(DrawRandomCard());
 
         // Show the user the dealer's hand.
-        DisplayHand(dealerHand, "dealer");
+        dealerHand.DisplayHand();
 
-
-
-        Scanner input = new Scanner(System.in);
 
         boolean userStay = false;
         boolean dealerStay = false;
@@ -73,16 +77,16 @@ public class Blackjack {
 
             if (choice.equalsIgnoreCase("hit")) {
                 Card userNewCard = DrawRandomCard();
-                userHand.add(userNewCard);
+                userHand.addCard(userNewCard);
                 System.out.println("You flipped a " + userNewCard);
-                DisplayHand(userHand, "user");
-                if (getHandTotal(userHand) > 21) {
+                userHand.DisplayHand();
+                if (userHand.getHandTotal() > 21) {
                     System.out.println("Bust!");
                     break;
                 }
             } else if (choice.equalsIgnoreCase("Stay")) {
                 userStay = true;
-                DisplayHand(userHand, "user");
+                userHand.DisplayHand();
 
             } else {
                 System.out.println("Do not understand?");
@@ -92,24 +96,27 @@ public class Blackjack {
 
             Thread.sleep(2000);
 
-            if (getHandTotal(dealerHand) <= getHandTotal(userHand)) {
+            if (dealerHand.getHandTotal() <= userHand.getHandTotal()) {
                 Card dealerNewCard = DrawRandomCard();
-                dealerHand.add(dealerNewCard);
-                if (getHandTotal(dealerHand) > 21) {
+                dealerHand.addCard(dealerNewCard);
+                if (dealerHand.getHandTotal() > 21) {
                     System.out.println("Dealer Busts, User wins!");
-                    DisplayHand(dealerHand, "dealer");
+                    dealerHand.DisplayHand();
+                    userHand.wallet = userHand.wallet + (bet * 2);
+                    System.out.println("You won: $" + (bet * 2));
+                    System.out.println("Your wallet total: $" + userHand.wallet);
                     break;
                 }
 
             } else {
                 System.out.println("Dealer stays!");
-                DisplayHand(dealerHand, "dealer");
+                dealerHand.DisplayHand();
                 break;
             }
         }
         while (!dealerStay && !userStay) {
 
-            if (getHandTotal(dealerHand) > getHandTotal(userHand)) {
+            if (dealerHand.getHandTotal() > userHand.getHandTotal()) {
                 System.out.println("Dealer won!");
                 break;
             }
@@ -118,7 +125,16 @@ public class Blackjack {
         System.out.println("Game over.");
     }
 
-    // Draws a random card from a deck with an unlimited supply.
+    public int getBet() {
+
+        System.out.println("Place your bet");
+        String choice = input.nextLine();
+        int bet;
+        bet = Integer.valueOf(choice);
+        return bet;
+
+    }
+
     private static Card DrawRandomCard() {
         int value = (int) (Math.random() * 13) + 1;
         switch(value) {
@@ -135,32 +151,8 @@ public class Blackjack {
 
     }
 
-    // Called to show a given hand to the user, via the console.
-    private static void DisplayHand(ArrayList<Card> hand, String prefix) {
-        System.out.print(prefix + " : ");
 
-        for (int i = 0; i < hand.size(); i++)
-        {
-            System.out.println(hand.get(i) + " ");
-        }
-        System.out.println();
 
-        System.out.println("Total: " + getHandTotal(hand));
-    }
-
-    // Returns the highest possible score for a given hand.
-    private static int getHandTotal(ArrayList<Card> hand) {
-        // TODO: Calculate the total value of a hand. If there is an Ace, use the higher value unless it causes a bust.
-        // Example: [A 8] should return 19. [A 6 9] should return 16.
-        int handTotal = 0;
-
-        for (int i = 0; i < hand.size(); i++){
-            Card card = hand.get(i);
-            int cardValue = card.value;
-            handTotal = handTotal + cardValue;
-        }
-        return handTotal;
-    }
 
     // Returns true if a value is considered a bust. Returns false if the value is still playable.
     private static boolean isValueBust(int handTotal) {
