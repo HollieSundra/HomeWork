@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -40,8 +39,19 @@ public class Blackjack {
         }
     }
 
+    private enum GameState {
+        Playing,
+        PlayerBust,
+        PlayerStay,
+        DealerBust,
+        DealerWon,
+        Draw
+    }
+
     private Player userHand;
     private Player dealerHand;
+
+    private GameState gameState;
 
 
     public void PlayGame() throws InterruptedException {
@@ -65,13 +75,16 @@ public class Blackjack {
         dealerHand.addCard(DrawRandomCard());
 
         // Show the user the dealer's hand.
-        dealerHand.DisplayHand();
+       // dealerHand.DisplayHand();
 
 
         boolean userStay = false;
         boolean dealerStay = false;
 
-        while (!userStay) {
+        gameState = GameState.Playing;
+
+        // Player's Turn
+        while (gameState == GameState.Playing) {
             System.out.println("Hit or Stay?: ");
             String choice = input.nextLine();
 
@@ -81,44 +94,63 @@ public class Blackjack {
                 System.out.println("You flipped a " + userNewCard);
                 userHand.DisplayHand();
                 if (userHand.getHandTotal() > 21) {
-                    System.out.println("Bust!");
+                    gameState = GameState.PlayerBust;
+                    dealerHand.DisplayHand();
                     break;
                 }
             } else if (choice.equalsIgnoreCase("Stay")) {
-                userStay = true;
+                gameState = GameState.PlayerStay;
                 userHand.DisplayHand();
 
             } else {
                 System.out.println("Do not understand?");
             }
         }
-        while (!dealerStay) {
 
+        // Dealer's Turn
+        while (gameState == GameState.PlayerStay) {
             Thread.sleep(2000);
 
-            if (dealerHand.getHandTotal() <= userHand.getHandTotal()) {
+            var dealerTotal = dealerHand.getHandTotal();
+
+                dealerHand.DisplayHand();
+
+            if (dealerTotal > 21) {
+                gameState = GameState.DealerBust;
+            } else if (dealerTotal < userHand.getHandTotal()) {
                 Card dealerNewCard = DrawRandomCard();
                 dealerHand.addCard(dealerNewCard);
-                if (dealerHand.getHandTotal() > 21) {
-                    System.out.println("Dealer Busts, User wins!");
-                    dealerHand.DisplayHand();
-                    userHand.wallet = userHand.wallet + (bet * 2);
-                    System.out.println("You won: $" + (bet * 2));
-                    System.out.println("Your wallet total: $" + userHand.wallet);
-                    break;
-                }
-
+            } else if (dealerTotal == userHand.getHandTotal()) {
+                gameState = GameState.Draw;
             } else {
-                System.out.println("Dealer stays!");
-                dealerHand.DisplayHand();
-                break;
+                gameState = GameState.DealerWon;
             }
         }
-        while (!dealerStay && !userStay) {
 
-            if (dealerHand.getHandTotal() > userHand.getHandTotal()) {
+        switch (gameState) {
+            case PlayerBust -> {
+                // Tell the player they bust!
+                System.out.println("You Bust!");
+                userHand.wallet = userHand.wallet - bet;
+                System.out.println("You lost: $" + bet);
+                System.out.println("Your wallet total: $" + userHand.wallet);
+            }
+            case DealerBust -> {
+                // Tell the user they won!
+                userHand.wallet = userHand.wallet + (bet * 2);
+                System.out.println("You won: $" + (bet * 2));
+                System.out.println("Your wallet total: $" + userHand.wallet);
+            }
+            case DealerWon -> {
                 System.out.println("Dealer won!");
-                break;
+                userHand.wallet = userHand.wallet - bet;
+                System.out.println("You lost: $" + bet);
+                System.out.println("Your wallet total: $" + userHand.wallet);
+            }
+            case Draw -> {
+                System.out.println("Draw!");
+                userHand.wallet = userHand.wallet + bet;
+                System.out.println("Your wallet total: $" + userHand.wallet);
             }
         }
 
@@ -162,20 +194,3 @@ public class Blackjack {
 
     }
 }
-/*
-            TODO: Write the game loop.
-            Setup:
-                User and dealer should both be given 2 cards to start.
-                Both hands should be displayed.
-            Player Loop:
-                Player is given the option to Hit or Stay.
-                If the player busts, their turn ends.
-                If the player stays, their turn ends.
-            Dealer Loop:
-                The dealer automatically plays, with a delay between steps.
-                The dealer's choices should be visible in the console.
-                The dealer ends by busting or staying.
-            Winner:
-                The winner is the player with the highest, non-bust score.
-                The winner should be displayed.
-         */
