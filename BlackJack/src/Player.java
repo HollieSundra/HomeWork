@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Player {
-
+    // i player
     // 1. Field/property declaration
 
     // 2. Constructor

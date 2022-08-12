@@ -1,7 +1,6 @@
 import java.util.Scanner;
 
 
-
 public class Blackjack {
 
     Scanner input = new Scanner(System.in);
@@ -53,9 +52,13 @@ public class Blackjack {
 
     private GameState gameState;
 
+    private IDeck deck;
+
 
     public void PlayGame() throws InterruptedException {
         System.out.println("Welcome to BlackJack.");
+
+        deck = new TrueDeck();
 
         userHand = new Player("user");
         dealerHand = new Player("dealer");
@@ -63,7 +66,7 @@ public class Blackjack {
         var bet = getBet();
         userHand.wallet = userHand.wallet - bet;
 
-        var randomCard = DrawRandomCard();
+        var randomCard = deck.DrawRandomCard();
         userHand.addCard(randomCard);
         userHand.addCard(randomCard);
 
@@ -71,8 +74,8 @@ public class Blackjack {
         userHand.DisplayHand();
 
         // Get a random card and give it to the dealer.
-        dealerHand.addCard(DrawRandomCard());
-        dealerHand.addCard(DrawRandomCard());
+        dealerHand.addCard(deck.DrawRandomCard());
+        dealerHand.addCard(deck.DrawRandomCard());
 
         // Show the user the dealer's hand.
        // dealerHand.DisplayHand();
@@ -89,7 +92,7 @@ public class Blackjack {
             String choice = input.nextLine();
 
             if (choice.equalsIgnoreCase("hit")) {
-                Card userNewCard = DrawRandomCard();
+                Card userNewCard = deck.DrawRandomCard();
                 userHand.addCard(userNewCard);
                 System.out.println("You flipped a " + userNewCard);
                 userHand.DisplayHand();
@@ -118,7 +121,7 @@ public class Blackjack {
             if (dealerTotal > 21) {
                 gameState = GameState.DealerBust;
             } else if (dealerTotal < userHand.getHandTotal()) {
-                Card dealerNewCard = DrawRandomCard();
+                Card dealerNewCard = deck.DrawRandomCard();
                 dealerHand.addCard(dealerNewCard);
             } else if (dealerTotal == userHand.getHandTotal()) {
                 gameState = GameState.Draw;
@@ -166,23 +169,6 @@ public class Blackjack {
         return bet;
 
     }
-
-    private static Card DrawRandomCard() {
-        int value = (int) (Math.random() * 13) + 1;
-        switch(value) {
-            case 13:
-                return Card.King;
-            case 12:
-                return Card.Queen;
-            case 11:
-                return Card.Jack;
-
-            default:
-                return Card.valueOf(value);
-        }
-
-    }
-
 
 
 
