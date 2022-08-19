@@ -15,7 +15,6 @@ public class Player {
 
     private ArrayList<Blackjack.Card> cards = new ArrayList<>();
 
-    public int wallet;
 
     private String prefix;
 

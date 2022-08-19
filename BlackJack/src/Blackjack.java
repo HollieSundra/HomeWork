@@ -47,8 +47,11 @@ public class Blackjack {
         Draw
     }
 
-    private Player userHand;
-    private Player dealerHand;
+    private User userHand;
+    private Dealer dealerHand;
+
+    private User wallet;
+
 
     private GameState gameState;
 
@@ -58,13 +61,13 @@ public class Blackjack {
     public void PlayGame() throws InterruptedException {
         System.out.println("Welcome to BlackJack.");
 
-        deck = new TrueDeck();
+        deck = new InfiniteDeck();
 
-        userHand = new Player("user");
-        dealerHand = new Player("dealer");
-        userHand.wallet = 100;
+        userHand = new User("user");
+        dealerHand = new Dealer("dealer");
+        userHand.setFunds(100);
         var bet = getBet();
-        userHand.wallet = userHand.wallet - bet;
+        userHand.subtractFunds(bet);
 
         var randomCard = deck.DrawRandomCard();
         userHand.addCard(randomCard);
@@ -134,26 +137,26 @@ public class Blackjack {
             case PlayerBust -> {
                 // Tell the player they bust!
                 System.out.println("You Bust!");
-                userHand.wallet = userHand.wallet - bet;
+                userHand.subtractFunds(bet);
                 System.out.println("You lost: $" + bet);
-                System.out.println("Your wallet total: $" + userHand.wallet);
+                System.out.println("Your wallet total: $" + userHand.totalFunds());
             }
             case DealerBust -> {
                 // Tell the user they won!
-                userHand.wallet = userHand.wallet + (bet * 2);
-                System.out.println("You won: $" + (bet * 2));
-                System.out.println("Your wallet total: $" + userHand.wallet);
+                userHand.addFunds(bet);
+                System.out.println("You won: $" + bet);
+                System.out.println("Your wallet total: $" + userHand.totalFunds());
             }
             case DealerWon -> {
                 System.out.println("Dealer won!");
-                userHand.wallet = userHand.wallet - bet;
+                userHand.subtractFunds(bet);
                 System.out.println("You lost: $" + bet);
-                System.out.println("Your wallet total: $" + userHand.wallet);
+                System.out.println("Your wallet total: $" + userHand.totalFunds());
             }
             case Draw -> {
                 System.out.println("Draw!");
-                userHand.wallet = userHand.wallet + bet;
-                System.out.println("Your wallet total: $" + userHand.wallet);
+                userHand.addFunds(bet);
+                System.out.println("Your wallet total: $" + userHand.totalFunds());
             }
         }
 
